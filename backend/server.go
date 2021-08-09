@@ -1,6 +1,10 @@
-package backend
+package main
 
-// import (
-// 	"net/http"
-// 	"os"
-// )
+import (
+	"backend/database"
+)
+
+func main() {
+	database.InitDB()
+	database.Login()
+}
