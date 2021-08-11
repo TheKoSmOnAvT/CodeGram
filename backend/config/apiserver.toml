@@ -1,0 +1,3 @@
+bind_addr=":4000"
+log_level="debug"
+database_url="../db/Codegram.db"

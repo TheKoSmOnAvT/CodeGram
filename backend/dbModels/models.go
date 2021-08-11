@@ -1,44 +1,40 @@
 package dbModels
 
-import (
-	"gorm.io/gorm"
-)
-
 type Account struct {
-	gorm.Model
-	nick         string
-	hashpassword uint
+	Id           uint
+	Nick         string
+	Hashpassword string
 }
 
 type Technology struct {
-	gorm.Model
-	info  string
-	title string
+	Id    uint
+	Info  string
+	Title string
 }
 
 type Post struct {
-	gorm.Model
-	code   string
-	text   string
-	date   uint64
-	author Account
+	Id     uint
+	Code   string
+	Text   string
+	Date   uint64
+	Author Account
 }
 
 type Likes struct {
-	gorm.Model
-	status bool
-	user   Account
-	post   Post
+	Id     uint
+	Status bool
+	User   Account
+	Post   Post
 }
 
 type Sublist struct {
-	gorm.Model
-	user   Account
-	sub_to Account
+	Id     uint
+	Sser   Account
+	Sub_to Account
 }
 
 type Post_technology struct {
-	gorm.Model
-	post       Post
-	technology Technology
+	Id         uint
+	Post       Post
+	Technology Technology
 }
