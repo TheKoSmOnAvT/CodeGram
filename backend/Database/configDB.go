@@ -1,7 +1,7 @@
 package database
 
 type Config struct {
-	DataBaseURL string `toml: "database_url"`
+	DataBaseURL string
 }
 
 func NewConfig() *Config {

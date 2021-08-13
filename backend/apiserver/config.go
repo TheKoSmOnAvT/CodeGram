@@ -3,8 +3,8 @@ package apiserver
 import database "backend/Database"
 
 type Config struct {
-	BingAddr string `toml: "bind_addr"`
-	LogLevel string `toml: "log_level"`
+	BingAddr string
+	LogLevel string
 	database *database.Config
 }
 

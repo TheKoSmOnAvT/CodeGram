@@ -1,11 +1,5 @@
 package dbModels
 
-type Account struct {
-	Id           uint
-	Nick         string
-	Hashpassword string
-}
-
 type Technology struct {
 	Id    uint
 	Info  string

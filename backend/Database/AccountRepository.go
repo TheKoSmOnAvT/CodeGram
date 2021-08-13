@@ -1,23 +1,50 @@
 package database
 
-import "backend/dbModels"
+import (
+	"backend/dbModels"
+
+	"golang.org/x/crypto/bcrypt"
+)
 
 type AccountRepository struct {
 	db *DataBase
 }
 
+//registration user acc
 func (c *AccountRepository) Create(acc *dbModels.Account) (*dbModels.Account, error) {
-	if err := c.db.context.QueryRow("insert into account(nick, hashpassword) values ($1,$2) returing id", acc.Nick, acc.Hashpassword).Scan(&acc.Id); err != nil {
+	err := acc.CreateHash()
+	if err != nil {
+		return nil, err
+	}
+	res, err := c.db.context.Exec("insert into account(nick, hashpassword) values ($1,$2);", acc.Nick, acc.Hashpassword)
+	if err != nil {
+		return nil, err
+	}
+	id, _ := res.LastInsertId()
+	acc.Id = uint(id)
+	return acc, nil
+}
+
+// find user in db by nickname
+func (c *AccountRepository) FindByNick(word string) (*dbModels.Account, error) {
+	acc := &dbModels.Account{}
+
+	if err := c.db.context.QueryRow("select id, nick from account where nick like $1", word).Scan(&acc.Id, &acc.Nick); err != nil {
 		return nil, err
 	}
 	return acc, nil
 }
 
-func (c *AccountRepository) FindByNick(word string) (*dbModels.Account, error) {
-	acc := &dbModels.Account{}
-
-	if err := c.db.context.QueryRow("select id, nick, hashpassword from account where nick like $1", word).Scan(&acc.Id, &acc.Nick, &acc.Hashpassword); err != nil {
+// login in account
+func (c *AccountRepository) Login(acc *dbModels.Account) (*dbModels.Account, error) {
+	searchedAcc := &dbModels.Account{}
+	if err := c.db.context.QueryRow("select id, nick, hashpassword from account where nick like $1", &acc.Nick).Scan(&searchedAcc.Id, &searchedAcc.Nick, &searchedAcc.Hashpassword); err != nil {
 		return nil, err
 	}
-	return acc, nil
+
+	err := bcrypt.CompareHashAndPassword([]byte(searchedAcc.Hashpassword), []byte(acc.Hashpassword))
+	if err != nil {
+		return nil, err
+	}
+	return searchedAcc, nil
 }

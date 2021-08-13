@@ -18,6 +18,16 @@ func New(config *Config) *DataBase {
 	}
 }
 
+func (DataBase *DataBase) Account() *AccountRepository {
+	if DataBase.accountRepository != nil {
+		return DataBase.accountRepository
+	}
+	DataBase.accountRepository = &AccountRepository{
+		db: DataBase,
+	}
+	return DataBase.accountRepository
+}
+
 func (DataBase *DataBase) Open() error {
 	context, err := sql.Open("sqlite3", DataBase.config.DataBaseURL)
 	if err != nil {
@@ -33,31 +43,3 @@ func (DataBase *DataBase) Open() error {
 func (DataBase *DataBase) Close() {
 	DataBase.context.Close()
 }
-
-func (DataBase *DataBase) Account() *AccountRepository {
-	if DataBase.accountRepository != nil {
-		return DataBase.accountRepository
-	}
-	DataBase.accountRepository = &AccountRepository{
-		db: DataBase,
-	}
-	return DataBase.accountRepository
-}
-
-// const pathToDB string = "../db/Codegram.db"
-
-// db, err := gorm.Open(sqlite.Open(pathToDB), &gorm.Config{})
-// if err != nil {
-// 	print(err)
-// 	panic("failed to connect database")
-// }
-// fmt.Print("OK")
-// var acc dbModels.Account
-// db.First(&acc) // find product with integer primary key
-// fmt.Printf("%+v", acc)
-
-// func Login() {
-// 	// var acc dbModels.Account
-// 	// db.First(&acc) // find product with integer primary key
-// 	// //fmt.Printf("%+v", res)
-// }
