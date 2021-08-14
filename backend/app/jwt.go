@@ -1,24 +1,24 @@
 package app
 
 import (
+	"backend/dbModels"
+	u "backend/utils"
 	"context"
 	"fmt"
-	"github.com/dgrijalva/jwt-go"
-	"go-contacts/models"
-	u "go-contacts/utils"
 	"net/http"
 	"os"
 	"strings"
+
+	"github.com/dgrijalva/jwt-go"
 )
 
 var JwtAuthentication = func(next http.Handler) http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
-		notAuth := []string{"/api/user/new", "/api/user/login"} //List of endpoints that doesn't require auth
-		requestPath := r.URL.Path                               //current request path
+		notAuth := []string{"/api/user/registration", "/api/user/login"}
+		requestPath := r.URL.Path
 
-		//check if request does not need authentication, serve the request if it doesn't need it
 		for _, value := range notAuth {
 
 			if value == requestPath {
@@ -48,7 +48,7 @@ var JwtAuthentication = func(next http.Handler) http.Handler {
 		}
 
 		tokenPart := splitted[1] //Grab the token part, what we are truly interested in
-		tk := &models.Token{}
+		tk := &dbModels.Token{}
 
 		token, err := jwt.ParseWithClaims(tokenPart, tk, func(token *jwt.Token) (interface{}, error) {
 			return []byte(os.Getenv("token_password")), nil

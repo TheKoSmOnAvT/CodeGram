@@ -26,12 +26,22 @@ func (c *AccountRepository) Create(acc *dbModels.Account) (*dbModels.Account, er
 }
 
 // find user in db by nickname
-func (c *AccountRepository) FindByNick(word string) (*dbModels.Account, error) {
-	acc := &dbModels.Account{}
-
-	if err := c.db.context.QueryRow("select id, nick from account where nick like $1", word).Scan(&acc.Id, &acc.Nick); err != nil {
+func (c *AccountRepository) FindByNick(word string) ([]*dbModels.Account, error) {
+	acc := make([]*dbModels.Account, 0)
+	word = "%" + word + "%"
+	rows, err := c.db.context.Query("select id, nick from account where nick like $1", word)
+	if err != nil {
 		return nil, err
 	}
+
+	for rows.Next() {
+		account := new(dbModels.Account)
+		if err := rows.Scan(&account.Id, &account.Nick); err != nil {
+			panic(err)
+		}
+		acc = append(acc, account)
+	}
+
 	return acc, nil
 }
 

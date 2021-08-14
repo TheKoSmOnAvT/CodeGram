@@ -6,6 +6,7 @@ type Account struct {
 	Id           uint   `json:"id"`
 	Nick         string `json:"nick"`
 	Hashpassword string `json:"password,omitempty"`
+	Token        string `json:"token,omitempty";sql:"-"`
 }
 
 func (acc *Account) CreateHash() error {

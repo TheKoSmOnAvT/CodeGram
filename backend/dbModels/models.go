@@ -1,5 +1,16 @@
 package dbModels
 
+import "github.com/dgrijalva/jwt-go"
+
+type SearchUser struct {
+	Nick string
+}
+
+type Token struct {
+	UserId uint
+	jwt.StandardClaims
+}
+
 type Technology struct {
 	Id    uint
 	Info  string

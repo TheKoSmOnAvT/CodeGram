@@ -2,6 +2,7 @@ package apiserver
 
 import (
 	database "backend/Database"
+	"backend/app"
 	"net/http"
 
 	"github.com/gorilla/mux"
@@ -51,18 +52,19 @@ func (s *APIServer) configureLogger() error {
 func (s *APIServer) configureRouter() {
 
 	s.router.HandleFunc("/api/user/login", s.Login()).Methods("POST")
-	//s.router.HandleFunc("/api/user/login", controllers.Authenticate).Methods("POST")
-	//s.router.HandleFunc("/api/contacts/new", controllers.CreateContact).Methods("POST")
-	//s.router.HandleFunc("/api/me/contacts", controllers.GetContactsFor).Methods("GET") //  user/2/contacts
+	s.router.HandleFunc("/api/user/registration", s.Registration()).Methods("POST")
+	s.router.HandleFunc("/api/user/search", s.Search()).Methods("GET")
 
-	//s.router.Use(app.JwtAuthentication) //attach JWT auth middleware
+	// подписка на аккаунт по id
+	// crud подписок
+	// лайк поста
+	// crud поста
+	// get технологий
+	// лист постов по подписке
+	// лист постов по id аккаунта
 
+	s.router.Use(app.JwtAuthentication)
 	s.logger.Info("4000")
-
-	// err := http.ListenAndServe(":4000", s.router) //Launch the app, visit localhost:8000/api
-	// if err != nil {
-	// 	s.logger.Info(err)
-	// }
 }
 
 //configuration data base
