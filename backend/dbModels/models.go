@@ -18,11 +18,11 @@ type Technology struct {
 }
 
 type Post struct {
-	Id     uint
-	Code   string
-	Text   string
-	Date   uint64
-	Author Account
+	Id       uint   `json:"id"`
+	Code     string `json:"code"`
+	Text     string `json:"text"`
+	Date     int64  `json:"date"`
+	AuthorId uint   `json:"author"`
 }
 
 type Likes struct {

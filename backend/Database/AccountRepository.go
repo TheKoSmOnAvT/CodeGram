@@ -58,3 +58,12 @@ func (c *AccountRepository) Login(acc *dbModels.Account) (*dbModels.Account, err
 	}
 	return searchedAcc, nil
 }
+
+// get nickname by id
+func (c *AccountRepository) GetUserById(id uint) (*dbModels.Account, error) {
+	acc := &dbModels.Account{}
+	if err := c.db.context.QueryRow("select id, nick from account where id = $1", id).Scan(&acc.Id, &acc.Nick); err != nil {
+		return nil, err
+	}
+	return acc, nil
+}

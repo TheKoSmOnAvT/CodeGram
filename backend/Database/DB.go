@@ -10,6 +10,7 @@ type DataBase struct {
 	config            *Config
 	context           *sql.DB
 	accountRepository *AccountRepository
+	postRepository    *PostRepository
 }
 
 func New(config *Config) *DataBase {
@@ -18,6 +19,7 @@ func New(config *Config) *DataBase {
 	}
 }
 
+//Account Entity
 func (DataBase *DataBase) Account() *AccountRepository {
 	if DataBase.accountRepository != nil {
 		return DataBase.accountRepository
@@ -26,6 +28,17 @@ func (DataBase *DataBase) Account() *AccountRepository {
 		db: DataBase,
 	}
 	return DataBase.accountRepository
+}
+
+//Post Entity
+func (DataBase *DataBase) Post() *PostRepository {
+	if DataBase.postRepository != nil {
+		return DataBase.postRepository
+	}
+	DataBase.postRepository = &PostRepository{
+		db: DataBase,
+	}
+	return DataBase.postRepository
 }
 
 func (DataBase *DataBase) Open() error {

@@ -51,14 +51,18 @@ func (s *APIServer) configureLogger() error {
 // configuration api
 func (s *APIServer) configureRouter() {
 
+	//account
 	s.router.HandleFunc("/api/user/login", s.Login()).Methods("POST")
 	s.router.HandleFunc("/api/user/registration", s.Registration()).Methods("POST")
 	s.router.HandleFunc("/api/user/search", s.Search()).Methods("GET")
 
+	//post
+	s.router.HandleFunc("/api/post/create", s.CreatePost()).Methods("POST")
+	s.router.HandleFunc("/api/post/delete", s.DeletePost()).Methods("DELETE")
+
 	// подписка на аккаунт по id
 	// crud подписок
-	// лайк поста
-	// crud поста
+	// лайк/unлайк поста
 	// get технологий
 	// лист постов по подписке
 	// лист постов по id аккаунта
