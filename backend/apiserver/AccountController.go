@@ -91,3 +91,86 @@ func (s *APIServer) Login() http.HandlerFunc {
 		utils.Respond(w, resp)
 	}
 }
+
+func (s *APIServer) GetMySubscribes() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		account := &dbModels.Account{}
+		err := json.NewDecoder(r.Body).Decode(account) //decode the request body into struct and failed if any error occur
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+
+		rep := s.database.Account()
+		subs, err := rep.GetSubscribes(account.Id)
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+		resp := utils.Message(true, "success")
+		resp["subs"] = subs
+
+		utils.Respond(w, resp)
+	}
+}
+
+func (s *APIServer) GetUserSubscribes() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+
+		myId := r.Context().Value("user").(uint)
+		rep := s.database.Account()
+		subs, err := rep.GetSubscribes(myId)
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+		resp := utils.Message(true, "success")
+		resp["subs"] = subs
+
+		utils.Respond(w, resp)
+	}
+}
+
+func (s *APIServer) Subscribe() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sub := &dbModels.Sublist{}
+		err := json.NewDecoder(r.Body).Decode(sub)
+
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+		sub.User = r.Context().Value("user").(uint)
+
+		rep := s.database.Account()
+		err = rep.Subscribe(sub)
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			return
+		}
+		resp := utils.Message(true, "success")
+		utils.Respond(w, resp)
+	}
+}
+
+func (s *APIServer) Unsubscribe() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		sub := &dbModels.Sublist{}
+		err := json.NewDecoder(r.Body).Decode(sub)
+
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+		sub.User = r.Context().Value("user").(uint)
+
+		rep := s.database.Account()
+		err = rep.Unsubscribe(sub)
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			return
+		}
+		resp := utils.Message(true, "success")
+		utils.Respond(w, resp)
+	}
+}

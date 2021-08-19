@@ -37,7 +37,7 @@ func (c *AccountRepository) FindByNick(word string) ([]*dbModels.Account, error)
 	for rows.Next() {
 		account := new(dbModels.Account)
 		if err := rows.Scan(&account.Id, &account.Nick); err != nil {
-			panic(err)
+			return nil, err
 		}
 		acc = append(acc, account)
 	}
@@ -66,4 +66,45 @@ func (c *AccountRepository) GetUserById(id uint) (*dbModels.Account, error) {
 		return nil, err
 	}
 	return acc, nil
+}
+
+//sub to user
+func (c *AccountRepository) Subscribe(sub *dbModels.Sublist) error {
+	if sub.Sub_to == sub.User {
+		return nil
+	}
+	_, err := c.db.context.Exec("insert into sublist(User, Sub_to) values ($1,$2);", sub.User, sub.Sub_to)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+//list of my subs
+func (c *AccountRepository) GetSubscribes(Id uint) ([]*dbModels.Account, error) {
+	subs := make([]*dbModels.Account, 0)
+	rows, err := c.db.context.Query("select id, nick from account where id in (select sub_to from sublist where user = $1) ", Id)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		account := new(dbModels.Account)
+		if err := rows.Scan(&account.Id, &account.Nick); err != nil {
+			return nil, err
+		}
+		subs = append(subs, account)
+	}
+	return subs, nil
+}
+
+//unsub to user
+func (c *AccountRepository) Unsubscribe(sub *dbModels.Sublist) error {
+	if sub.Sub_to == sub.User {
+		return nil
+	}
+	_, err := c.db.context.Exec("Delete from sublist where User = $1 and Sub_to = $2;", sub.User, sub.Sub_to)
+	if err != nil {
+		return err
+	}
+	return nil
 }

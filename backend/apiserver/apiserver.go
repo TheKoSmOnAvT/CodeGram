@@ -55,15 +55,22 @@ func (s *APIServer) configureRouter() {
 	s.router.HandleFunc("/api/user/login", s.Login()).Methods("POST")
 	s.router.HandleFunc("/api/user/registration", s.Registration()).Methods("POST")
 	s.router.HandleFunc("/api/user/search", s.Search()).Methods("GET")
+	//subs
+	s.router.HandleFunc("/api/user/mySub", s.GetMySubscribes()).Methods("GET")
+	s.router.HandleFunc("/api/user/subUser", s.GetUserSubscribes()).Methods("GET")
+	s.router.HandleFunc("/api/user/sub", s.Subscribe()).Methods("POST")
+	s.router.HandleFunc("/api/user/sub", s.Unsubscribe()).Methods("DELETE")
 
 	//post
 	s.router.HandleFunc("/api/post/create", s.CreatePost()).Methods("POST")
 	s.router.HandleFunc("/api/post/delete", s.DeletePost()).Methods("DELETE")
+	//like unlike
+	s.router.HandleFunc("/api/post/like", s.LikePost()).Methods("POST")
+	s.router.HandleFunc("/api/post/like", s.UnlikePost()).Methods("DELETE")
 
-	// подписка на аккаунт по id
-	// crud подписок
-	// лайк/unлайк поста
-	// get технологий
+	//technology
+	s.router.HandleFunc("/api/technology", s.GetTechNology()).Methods("GET")
+
 	// лист постов по подписке
 	// лист постов по id аккаунта
 
