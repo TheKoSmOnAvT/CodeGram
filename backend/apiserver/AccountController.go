@@ -17,7 +17,7 @@ func (s *APIServer) Search() http.HandlerFunc {
 		err := json.NewDecoder(r.Body).Decode(&data)
 
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
@@ -25,7 +25,7 @@ func (s *APIServer) Search() http.HandlerFunc {
 		result, err := rep.FindByNick(data.Nick)
 		if err != nil {
 			fmt.Print(err)
-			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
@@ -41,14 +41,14 @@ func (s *APIServer) Registration() http.HandlerFunc {
 		account := &dbModels.Account{}
 		err := json.NewDecoder(r.Body).Decode(account) //decode the request body into struct and failed if any error occur
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
 		rep := s.database.Account()
 		result, err := rep.Create(account)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
@@ -69,14 +69,14 @@ func (s *APIServer) Login() http.HandlerFunc {
 		account := &dbModels.Account{}
 		err := json.NewDecoder(r.Body).Decode(account) //decode the request body into struct and failed if any error occur
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
 		rep := s.database.Account()
 		result, err := rep.Login(account)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
@@ -92,19 +92,19 @@ func (s *APIServer) Login() http.HandlerFunc {
 	}
 }
 
-func (s *APIServer) GetMySubscribes() http.HandlerFunc {
+func (s *APIServer) GetUserSubscribes() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		account := &dbModels.Account{}
 		err := json.NewDecoder(r.Body).Decode(account) //decode the request body into struct and failed if any error occur
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
 		rep := s.database.Account()
 		subs, err := rep.GetSubscribes(account.Id)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		resp := utils.Message(true, "success")
@@ -114,14 +114,14 @@ func (s *APIServer) GetMySubscribes() http.HandlerFunc {
 	}
 }
 
-func (s *APIServer) GetUserSubscribes() http.HandlerFunc {
+func (s *APIServer) GetMySubscribes() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		myId := r.Context().Value("user").(uint)
 		rep := s.database.Account()
 		subs, err := rep.GetSubscribes(myId)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		resp := utils.Message(true, "success")
@@ -137,7 +137,7 @@ func (s *APIServer) Subscribe() http.HandlerFunc {
 		err := json.NewDecoder(r.Body).Decode(sub)
 
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		sub.User = r.Context().Value("user").(uint)
@@ -145,7 +145,7 @@ func (s *APIServer) Subscribe() http.HandlerFunc {
 		rep := s.database.Account()
 		err = rep.Subscribe(sub)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		resp := utils.Message(true, "success")
@@ -159,7 +159,7 @@ func (s *APIServer) Unsubscribe() http.HandlerFunc {
 		err := json.NewDecoder(r.Body).Decode(sub)
 
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		sub.User = r.Context().Value("user").(uint)
@@ -167,7 +167,7 @@ func (s *APIServer) Unsubscribe() http.HandlerFunc {
 		rep := s.database.Account()
 		err = rep.Unsubscribe(sub)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		resp := utils.Message(true, "success")

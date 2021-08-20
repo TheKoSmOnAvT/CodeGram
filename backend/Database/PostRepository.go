@@ -9,7 +9,7 @@ type PostRepository struct {
 }
 
 func (c *PostRepository) Create(post *dbModels.PostСreateModel) (*dbModels.PostСreateModel, error) {
-	res, err := c.db.context.Exec("insert into post(author, code, text, date) values ($1,$2);", post.AuthorId, post.Code, post.Text, post.Date)
+	res, err := c.db.context.Exec("insert into post(author, code, text, date) values ($1,$2,$3,$4);", post.AuthorId, post.Code, post.Text, post.Date)
 	if err != nil {
 		return nil, err
 	}
@@ -40,6 +40,14 @@ func (c *PostRepository) DeleteTechnologyListToPost(post *dbModels.PostСreateMo
 func (c *PostRepository) Delete(post *dbModels.PostСreateModel) error {
 	_, err := c.db.context.Exec("delete from post where author = $1 and id = $2;", post.AuthorId, post.Id)
 	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (c *PostRepository) CheckToDelete(post *dbModels.PostСreateModel) error {
+	postCheck := &dbModels.Post{}
+	if err := c.db.context.QueryRow("select Id from post where author = $1 and id = $2;", post.AuthorId, post.Id).Scan(&postCheck.Id); err != nil {
 		return err
 	}
 	return nil
@@ -79,16 +87,6 @@ func (c *PostRepository) UnlikePost(likeModel *dbModels.Likes) error {
 	}
 	return nil
 }
-
-//type Feed struct {
-// 	UserId      uint              `json:"userId"`
-// 	UserNick    string            `json:"userNick"`
-// 	PostId      uint              `json:"postId"`
-// 	Code        string            `json:"code"`
-// 	Text        string            `json:"text"`
-// 	Date        int64             `json:"date"`
-// 	Technologys []Post_technology `json:"technologys"`
-// }
 
 func (c *PostRepository) GetMyFeed(myId uint, limit uint, offset uint) ([]*dbModels.Feed, error) {
 	feeds := make([]*dbModels.Feed, 0)

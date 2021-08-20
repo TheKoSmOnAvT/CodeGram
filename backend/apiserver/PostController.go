@@ -13,7 +13,7 @@ func (s *APIServer) CreatePost() http.HandlerFunc {
 		post := &dbModels.PostСreateModel{}
 		err := json.NewDecoder(r.Body).Decode(post)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
@@ -23,20 +23,20 @@ func (s *APIServer) CreatePost() http.HandlerFunc {
 		repPost := s.database.Post()
 		resultPost, err := repPost.Create(post)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
 		err = repPost.AddTechnologyListToPost(post)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
 		repAccount := s.database.Account()
 		resultAccount, err := repAccount.GetUserById(post.AuthorId)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid data or db error"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
@@ -53,23 +53,28 @@ func (s *APIServer) DeletePost() http.HandlerFunc {
 		post := &dbModels.PostСreateModel{}
 		err := json.NewDecoder(r.Body).Decode(post)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		post.AuthorId = r.Context().Value("user").(uint)
 
 		repPost := s.database.Post()
 
-		err = repPost.Delete(post)
+		err = repPost.CheckToDelete(post)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, "Have not permission"))
 			return
 		}
 
-		//PRAGMA foreign_keys = off
+		err = repPost.Delete(post)
+		if err != nil {
+			utils.Respond(w, utils.Message(false, string(err.Error())))
+			return
+		}
+
 		err = repPost.DeleteTechnologyListToPost(post)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
@@ -83,7 +88,7 @@ func (s *APIServer) GetTechNology() http.HandlerFunc {
 		repPost := s.database.Post()
 		res, err := repPost.TechnologyList()
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
@@ -99,12 +104,13 @@ func (s *APIServer) LikePost() http.HandlerFunc {
 		like := &dbModels.Likes{}
 		err := json.NewDecoder(r.Body).Decode(like)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
+		like.User = r.Context().Value("user").(uint)
 		err = repPost.LikePost(like)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		resp := utils.Message(true, "success")
@@ -118,12 +124,13 @@ func (s *APIServer) UnlikePost() http.HandlerFunc {
 		like := &dbModels.Likes{}
 		err := json.NewDecoder(r.Body).Decode(like)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
+		like.User = r.Context().Value("user").(uint)
 		err = repPost.UnlikePost(like)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		resp := utils.Message(true, "success")
@@ -139,7 +146,7 @@ func (s *APIServer) GetMyFeed() http.HandlerFunc {
 		repPost := s.database.Post()
 		posts, err := repPost.GetMyFeed(myId, limit, offset)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		resp := utils.Message(true, "success")
@@ -155,14 +162,14 @@ func (s *APIServer) GetPostsUserById() http.HandlerFunc {
 		acc := &dbModels.Account{}
 		err := json.NewDecoder(r.Body).Decode(acc)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 
 		repPost := s.database.Post()
 		posts, err := repPost.GetPostsUserById(acc.Id, limit, offset)
 		if err != nil {
-			utils.Respond(w, utils.Message(false, "Invalid request"))
+			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return
 		}
 		resp := utils.Message(true, "success")
