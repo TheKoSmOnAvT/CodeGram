@@ -71,8 +71,9 @@ func (s *APIServer) configureRouter() {
 	//technology
 	s.router.HandleFunc("/api/technology", s.GetTechNology()).Methods("GET")
 
-	// лист постов по подписке
-	// лист постов по id аккаунта
+	//feed
+	s.router.HandleFunc("/api/myFeed", s.GetMyFeed()).Methods("GET")
+	s.router.HandleFunc("/api/post/userById", s.GetPostsUserById()).Methods("GET")
 
 	s.router.Use(app.JwtAuthentication)
 	s.logger.Info("4000")

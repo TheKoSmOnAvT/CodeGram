@@ -6,6 +6,16 @@ type SearchUser struct {
 	Nick string
 }
 
+type Feed struct {
+	UserId      uint          `json:"userId"`
+	UserNick    string        `json:"userNick"`
+	PostId      uint          `json:"postId"`
+	Code        string        `json:"code"`
+	Text        string        `json:"text"`
+	Date        int64         `json:"date"`
+	Technologys []*Technology `json:"technologys,omitempty"`
+}
+
 type Token struct {
 	UserId uint
 	jwt.StandardClaims
@@ -22,7 +32,7 @@ type Post struct {
 	Code     string `json:"code"`
 	Text     string `json:"text"`
 	Date     int64  `json:"date"`
-	AuthorId uint   `json:"author"`
+	AuthorId uint   `json:"author,omitempty"`
 }
 
 type PostСreateModel struct {

@@ -79,3 +79,89 @@ func (c *PostRepository) UnlikePost(likeModel *dbModels.Likes) error {
 	}
 	return nil
 }
+
+//type Feed struct {
+// 	UserId      uint              `json:"userId"`
+// 	UserNick    string            `json:"userNick"`
+// 	PostId      uint              `json:"postId"`
+// 	Code        string            `json:"code"`
+// 	Text        string            `json:"text"`
+// 	Date        int64             `json:"date"`
+// 	Technologys []Post_technology `json:"technologys"`
+// }
+
+func (c *PostRepository) GetMyFeed(myId uint, limit uint, offset uint) ([]*dbModels.Feed, error) {
+	feeds := make([]*dbModels.Feed, 0)
+	postsRows, err := c.db.context.Query("select id, code, text, date from post where author in (select sub_to from sublist where user = $1)  order by date desc limit $2 offset $3", myId, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for postsRows.Next() {
+		post := new(dbModels.Post)
+		if err := postsRows.Scan(&post.Id, &post.Code, &post.Text, &post.Date); err != nil {
+			return nil, err
+		}
+
+		techs := make([]*dbModels.Technology, 0)
+		techRows, err := c.db.context.Query("select id, title, info from technology where id in(select technology from post_technology where post = $1)", post.Id)
+		if err != nil {
+			return nil, err
+		}
+		for techRows.Next() {
+			tech := new(dbModels.Technology)
+			if err := techRows.Scan(&tech.Id, &tech.Title, &tech.Info); err != nil {
+				return nil, err
+			}
+			techs = append(techs, tech)
+		}
+
+		acc := &dbModels.Account{}
+		if err := c.db.context.QueryRow("select id, nick from account where id = $1", post.AuthorId).Scan(&acc.Id, &acc.Nick); err != nil {
+			return nil, err
+		}
+
+		feed := &dbModels.Feed{UserId: post.AuthorId, Technologys: techs, PostId: post.Id, Code: post.Code, Text: post.Text, Date: post.Date, UserNick: acc.Nick}
+		feeds = append(feeds, feed)
+	}
+
+	return feeds, nil
+}
+
+func (c *PostRepository) GetPostsUserById(userId uint, limit uint, offset uint) ([]*dbModels.Feed, error) {
+	feeds := make([]*dbModels.Feed, 0)
+	postsRows, err := c.db.context.Query("select id, code, text, date from post where author = $1 order by date desc limit $2 offset $3", userId, limit, offset)
+	if err != nil {
+		return nil, err
+	}
+
+	for postsRows.Next() {
+		post := new(dbModels.Post)
+		if err := postsRows.Scan(&post.Id, &post.Code, &post.Text, &post.Date); err != nil {
+			return nil, err
+		}
+
+		techs := make([]*dbModels.Technology, 0)
+		techRows, err := c.db.context.Query("select id, title, info from technology where id in(select technology from post_technology where post = $1)", post.Id)
+		if err != nil {
+			return nil, err
+		}
+		for techRows.Next() {
+			tech := new(dbModels.Technology)
+			if err := techRows.Scan(&tech.Id, &tech.Title, &tech.Info); err != nil {
+				return nil, err
+			}
+			techs = append(techs, tech)
+		}
+
+		acc := &dbModels.Account{}
+		if err := c.db.context.QueryRow("select id, nick from account where id = $1", userId).Scan(&acc.Id, &acc.Nick); err != nil {
+			return nil, err
+		}
+
+		feed := &dbModels.Feed{UserId: post.AuthorId, Technologys: techs, PostId: post.Id, Code: post.Code, Text: post.Text, Date: post.Date, UserNick: acc.Nick}
+		feeds = append(feeds, feed)
+	}
+
+	return feeds, nil
+}

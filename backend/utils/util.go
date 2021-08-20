@@ -3,6 +3,7 @@ package utils
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -22,4 +23,19 @@ func CreateHash(password string) (string, error) {
 		return "", err
 	}
 	return string(hash), nil
+}
+
+func ConvertNums(limitStr string, offsetStr string) (uint, uint) {
+	offset, _ := strconv.ParseUint(offsetStr, 10, 64)
+	limit, _ := strconv.ParseUint(limitStr, 10, 64)
+
+	if offset <= 0 {
+		offset = 1
+	}
+	if limit <= 0 {
+		limit = 1
+	}
+	offset = (offset - 1) * limit
+
+	return uint(limit), uint(offset)
 }

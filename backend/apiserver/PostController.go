@@ -130,3 +130,43 @@ func (s *APIServer) UnlikePost() http.HandlerFunc {
 		utils.Respond(w, resp)
 	}
 }
+
+func (s *APIServer) GetMyFeed() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		limit, offset := utils.ConvertNums(r.URL.Query().Get("limit"), r.URL.Query().Get("offset"))
+
+		myId := r.Context().Value("user").(uint)
+		repPost := s.database.Post()
+		posts, err := repPost.GetMyFeed(myId, limit, offset)
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+		resp := utils.Message(true, "success")
+		resp["posts"] = posts
+		utils.Respond(w, resp)
+	}
+}
+
+func (s *APIServer) GetPostsUserById() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		limit, offset := utils.ConvertNums(r.URL.Query().Get("limit"), r.URL.Query().Get("offset"))
+
+		acc := &dbModels.Account{}
+		err := json.NewDecoder(r.Body).Decode(acc)
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+
+		repPost := s.database.Post()
+		posts, err := repPost.GetPostsUserById(acc.Id, limit, offset)
+		if err != nil {
+			utils.Respond(w, utils.Message(false, "Invalid request"))
+			return
+		}
+		resp := utils.Message(true, "success")
+		resp["posts"] = posts
+		utils.Respond(w, resp)
+	}
+}
