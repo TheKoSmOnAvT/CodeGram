@@ -71,7 +71,6 @@ func (s *APIServer) configureRouter() {
 	//technology
 	s.router.HandleFunc("/api/technology", s.GetTechNology()).Methods("GET")
 
-	//To Test + add like status to posts
 	//feed
 	s.router.HandleFunc("/api/myFeed", s.GetMyFeed()).Methods("GET")
 	s.router.HandleFunc("/api/post/userById", s.GetPostsUserById()).Methods("GET")

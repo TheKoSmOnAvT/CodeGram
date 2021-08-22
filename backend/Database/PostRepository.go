@@ -90,14 +90,14 @@ func (c *PostRepository) UnlikePost(likeModel *dbModels.Likes) error {
 
 func (c *PostRepository) GetMyFeed(myId uint, limit uint, offset uint) ([]*dbModels.Feed, error) {
 	feeds := make([]*dbModels.Feed, 0)
-	postsRows, err := c.db.context.Query("select id, code, text, date from post where author in (select sub_to from sublist where user = $1)  order by date desc limit $2 offset $3", myId, limit, offset)
+	postsRows, err := c.db.context.Query("select id, code, text, date, author from post where author in (select sub_to from sublist where user = $1)  order by date desc limit $2 offset $3", myId, limit, offset)
 	if err != nil {
 		return nil, err
 	}
 
 	for postsRows.Next() {
 		post := new(dbModels.Post)
-		if err := postsRows.Scan(&post.Id, &post.Code, &post.Text, &post.Date); err != nil {
+		if err := postsRows.Scan(&post.Id, &post.Code, &post.Text, &post.Date, &post.AuthorId); err != nil {
 			return nil, err
 		}
 
@@ -111,22 +111,45 @@ func (c *PostRepository) GetMyFeed(myId uint, limit uint, offset uint) ([]*dbMod
 			if err := techRows.Scan(&tech.Id, &tech.Title, &tech.Info); err != nil {
 				return nil, err
 			}
+
 			techs = append(techs, tech)
 		}
 
 		acc := &dbModels.Account{}
-		if err := c.db.context.QueryRow("select id, nick from account where id = $1", post.AuthorId).Scan(&acc.Id, &acc.Nick); err != nil {
+		accountResult, err := c.db.context.Query("select id, nick from account where id = $1", post.AuthorId)
+		if err != nil {
+			return nil, err
+		}
+		for accountResult.Next() {
+			if err := accountResult.Scan(&acc.Id, &acc.Nick); err != nil {
+				return nil, err
+			}
+		}
+
+		likeResult, err := c.db.context.Query("select count(*) from likes where post = $1 and user = $2", post.Id, myId)
+		if err != nil {
 			return nil, err
 		}
 
-		feed := &dbModels.Feed{UserId: post.AuthorId, Technologys: techs, PostId: post.Id, Code: post.Code, Text: post.Text, Date: post.Date, UserNick: acc.Nick}
+		likeStatus := false
+		count := 0
+		for likeResult.Next() {
+			if err := likeResult.Scan(&count); err != nil {
+				return nil, err
+			}
+		}
+		if count > 0 {
+			likeStatus = true
+		}
+
+		feed := &dbModels.Feed{UserId: post.AuthorId, Technologys: techs, PostId: post.Id, Code: post.Code, Text: post.Text, Date: post.Date, UserNick: acc.Nick, LikeStatus: likeStatus}
 		feeds = append(feeds, feed)
 	}
 
 	return feeds, nil
 }
 
-func (c *PostRepository) GetPostsUserById(userId uint, limit uint, offset uint) ([]*dbModels.Feed, error) {
+func (c *PostRepository) GetPostsUserById(myId uint, userId uint, limit uint, offset uint) ([]*dbModels.Feed, error) {
 	feeds := make([]*dbModels.Feed, 0)
 	postsRows, err := c.db.context.Query("select id, code, text, date from post where author = $1 order by date desc limit $2 offset $3", userId, limit, offset)
 	if err != nil {
@@ -157,7 +180,23 @@ func (c *PostRepository) GetPostsUserById(userId uint, limit uint, offset uint) 
 			return nil, err
 		}
 
-		feed := &dbModels.Feed{UserId: post.AuthorId, Technologys: techs, PostId: post.Id, Code: post.Code, Text: post.Text, Date: post.Date, UserNick: acc.Nick}
+		likeResult, err := c.db.context.Query("select count(*) from likes where post = $1 and user = $2", post.Id, myId)
+		if err != nil {
+			return nil, err
+		}
+
+		likeStatus := false
+		count := 0
+		for likeResult.Next() {
+			if err := likeResult.Scan(&count); err != nil {
+				return nil, err
+			}
+		}
+		if count > 0 {
+			likeStatus = true
+		}
+
+		feed := &dbModels.Feed{UserId: userId, Technologys: techs, PostId: post.Id, Code: post.Code, Text: post.Text, Date: post.Date, UserNick: acc.Nick, LikeStatus: likeStatus}
 		feeds = append(feeds, feed)
 	}
 

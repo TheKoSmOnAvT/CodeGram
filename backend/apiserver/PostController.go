@@ -167,7 +167,8 @@ func (s *APIServer) GetPostsUserById() http.HandlerFunc {
 		}
 
 		repPost := s.database.Post()
-		posts, err := repPost.GetPostsUserById(acc.Id, limit, offset)
+		myId := r.Context().Value("user").(uint)
+		posts, err := repPost.GetPostsUserById(myId, acc.Id, limit, offset)
 		if err != nil {
 			utils.Respond(w, utils.Message(false, string(err.Error())))
 			return

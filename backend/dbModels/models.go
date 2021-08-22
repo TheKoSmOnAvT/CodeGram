@@ -13,6 +13,7 @@ type Feed struct {
 	Code        string        `json:"code"`
 	Text        string        `json:"text"`
 	Date        int64         `json:"date"`
+	LikeStatus  bool          `json:"likeStatus"`
 	Technologys []*Technology `json:"technologys,omitempty"`
 }
 
